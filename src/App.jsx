@@ -15,7 +15,7 @@ const firebaseConfig = {
 };
 
 initializeApp(firebaseConfig);
-const db = getDatabase();
+const db = getDatabase(undefined, "https://putping-dc57e-default-rtdb.europe-west1.firebasedatabase.app");
 const auth = getAuth();
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiZGl2YWRyZWRlIiwiYSI6ImNtZHd5YjR4NTE3OW4ybHF3bmVucWxqcjEifQ.tuOBnAN8iHiYujXklg9h5w';
@@ -47,6 +47,7 @@ export default function Home() {
     if (userId && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log("POLOHA ZÍSKÁNA: ", position);
           const userRef = ref(db, `users/${userId}`);
           set(userRef, {
             location: {
