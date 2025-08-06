@@ -32,17 +32,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-  if (!map && document.getElementById('map')) {
-    const initializeMap = new mapboxgl.Map({
-      container: "map",
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [14.42076, 50.08804],
-      zoom: 13
-    });
-    setMap(initializeMap);
-  }
-}, [map]);
-
+    if (!map && document.getElementById('map')) {
+      const initializeMap = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [14.42076, 50.08804],
+        zoom: 13
+      });
+      setMap(initializeMap);
+    }
+  }, [map]);
 
   useEffect(() => {
     if (userId && "geolocation" in navigator) {
@@ -87,13 +86,6 @@ export default function Home() {
 
   useEffect(() => {
     if (map) {
-      map.eachLayer((layer) => {
-        if (layer.id.startsWith("user-marker-")) {
-          map.removeLayer(layer.id);
-          map.removeSource(layer.id);
-        }
-      });
-
       Object.entries(users).forEach(([uid, user]) => {
         if (user.location) {
           new mapboxgl.Marker({ color: uid === userId ? "red" : "blue" })
