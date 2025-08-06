@@ -32,16 +32,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!map) {
-      const initializeMap = new mapboxgl.Map({
-        container: "map",
-        style: "mapbox://styles/mapbox/streets-v11",
-        center: [14.42076, 50.08804],
-        zoom: 13
-      });
-      setMap(initializeMap);
-    }
-  }, [map]);
+  if (!map && document.getElementById('map')) {
+    const initializeMap = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [14.42076, 50.08804],
+      zoom: 13
+    });
+    setMap(initializeMap);
+  }
+}, [map]);
+
 
   useEffect(() => {
     if (userId && "geolocation" in navigator) {
