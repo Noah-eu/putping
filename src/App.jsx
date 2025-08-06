@@ -44,21 +44,34 @@ export default function Home() {
     }
   }, [map]);
 
-  useEffect(() => {
-    if (userId) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const userRef = ref(db, `users/${userId}`);
-        set(userRef, {
-          location: {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          },
-          status: "active",
-          lastActive: Date.now()
-        });
-      });
+ useEffect(() => {
+  if (userId) {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userRef = ref(db, `users/${userId}`);
+          set(userRef, {
+            location: {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            },
+            status: "active",
+            lastActive: Date.now()
+          });
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            alert("Musíš povolit sdílení polohy, aby ses zobrazil na mapě.");
+          } else {
+            alert("Nepodařilo se získat polohu.");
+          }
+        }
+      );
+    } else {
+      alert("Tvůj prohlížeč nepodporuje geolokaci.");
     }
-  }, [userId]);
+  }
+}, [userId]);
 
   useEffect(() => {
     const usersRef = ref(db, "users");
