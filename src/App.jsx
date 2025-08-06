@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue } from "firebase/database";
@@ -37,16 +36,15 @@ export default function Home() {
       const initializeMap = new mapboxgl.Map({
         container: "map",
         style: "mapbox://styles/mapbox/streets-v11",
-        center: [14.42076, 50.08804], // Prague center
+        center: [14.42076, 50.08804],
         zoom: 13
       });
       setMap(initializeMap);
     }
   }, [map]);
 
- useEffect(() => {
-  if (userId) {
-    if (navigator.geolocation) {
+  useEffect(() => {
+    if (userId && "geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const userRef = ref(db, `users/${userId}`);
@@ -65,33 +63,45 @@ export default function Home() {
           } else {
             alert("Nepodařilo se získat polohu.");
           }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     } else {
-      alert("Tvůj prohlížeč nepodporuje geolokaci.");
+      console.error("Geolocation not supported by this browser.");
     }
-  }
-}, [userId]);
+  }, [userId]);
 
   useEffect(() => {
     const usersRef = ref(db, "users");
-    onValue(usersRef, (snapshot) => {
+    const unsubscribe = onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
       setUsers(data || {});
     });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (map && users) {
-      Object.values(users).forEach((user) => {
+    if (map) {
+      map.eachLayer((layer) => {
+        if (layer.id.startsWith("user-marker-")) {
+          map.removeLayer(layer.id);
+          map.removeSource(layer.id);
+        }
+      });
+
+      Object.entries(users).forEach(([uid, user]) => {
         if (user.location) {
-          new mapboxgl.Marker()
+          new mapboxgl.Marker({ color: uid === userId ? "red" : "blue" })
             .setLngLat([user.location.lng, user.location.lat])
             .addTo(map);
         }
       });
     }
-  }, [map, users]);
+  }, [map, users, userId]);
 
   return (
     <div>
